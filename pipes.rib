@@ -1,0 +1,79 @@
+Display "foo.tif" "framebuffer" "rgb"
+Display "+foo.tif" "file" "rgba"
+Format 1000 1000 1.0
+Shutter 0.0 100.0
+PixelSamples 8 8
+
+Projection "perspective" "fov" 13
+
+Translate 0.0 0.0 5.0
+#Rotate 40.0 1 0 0
+LightSource "distantlight" "from" [-1  .5 -.1] "to" [0 0 0] "intensity" 1
+LightSource "distantlight" "from" [ 1 -.5  .1] "to" [0 0 0] "intensity" .5
+
+#Rotate 24.0 0.0 1.0 0.0
+#Rotate -15 1 0 0
+WorldBegin
+    #Atmosphere "fog" "distance" 44 "background" [0 0 0 ]
+    #LightSource "distantlight" "from" [-.1 0 -1] "to" [0 0 0] "intensity" 1.0
+    # LightSource "ambientlight" "intensity" .1 "lightcolor" [1 1 1]
+
+    # ShadingRate 40
+    # ShadingInterpolation "constant"
+    #Surface "plastic" "roughness" 1
+    Surface "matte"
+    #Surface "constant"
+    #Surface "glass"
+    Color 1 1 1
+    Scale $aspect 1 1
+    # Polygon "P" [.5 .5 .5 .5 -.5 .5 -.5 -.5 .5 -.5 .5 .5]
+    TransformBegin
+        {% with ystep=1.0/height; xstep=1.0/width %}
+            {% for column in range(-width, width) %}TransformBegin
+                {% for row in range(height) %}TransformBegin
+                    {% with
+                        slant = .2;
+
+                        y = float(row) / height;
+                        add = y * slant;
+
+                        yup = float(row + 1) / height
+                        addup = yup * slant;
+
+                        x = float(column) / width + add;
+                        xup = float(column) / width + addup;
+                        i = intensity(x, y);
+                        iup = intensity(xup, yup);
+                    %}
+                        Translate ${x - .5} ${y - .5} 0
+                        Color ${color(x, y + ystep*.5)}
+                        #Surface "plastic" "Ks" ${i} "roughness" ${i}
+                        #Opacity $i $i $i
+                        {% with r=i*xstep*.5*1.2; rup=iup*xstep*.5*1.2 %}
+                            #Translate 0 ${r} 0
+                            #Sphere ${r} -${r} ${r} 360
+                            #Skew ${math.degrees(math.atan2(xup - x, yup - y))} 0 1 0 1 0 0
+                            #Skew ${math.degrees(math.atan(slant))} 0 1 0 1 0 0
+                            Skew ${math.degrees(math.atan(slant))} 0 1 0 1 0 0
+                            Rotate -90 1 0 0
+                            #Cylinder $r 0 $ystep 360
+                            #Cylinder ${xstep*.25} 0 $ystep 360
+                            Hyperboloid $r 0 0 $rup 0 $ystep 360
+                            #Rotate -90 1 0 0
+                            #Hyperboloid ${xstep*.5} 0 0 0 0 ${ystep*(i)} 360
+                        {% end %}
+                    {% end %}
+                TransformEnd{% end %}
+            TransformEnd{% end %}
+        {% end %}
+
+        AttributeBegin
+            Surface "plastic"
+            Rotate -90 1 0 0
+            Color 1 0 0
+            #Translate .5 0 0
+            #Cone 2 2 360
+        AttributeEnd
+    TransformEnd
+WorldEnd
+
