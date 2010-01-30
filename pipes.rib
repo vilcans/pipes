@@ -32,8 +32,6 @@ WorldBegin
             {% for column in range(-width, width) %}TransformBegin
                 {% for row in range(height) %}TransformBegin
                     {% with
-                        slant = .2;
-
                         y = float(row) / height;
                         add = y * slant;
 

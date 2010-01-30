@@ -17,9 +17,15 @@ from PIL import Image
 
 GAMMA = 1.0
 width = 50
-height = 200
 vary_color_limit = .1
-image_file = 'portrait.jpg'
+slant = .2;
+
+
+if True:
+    image_file = 'portrait.jpg'
+    height = 20
+    GAMMA = .5
+    slant = .1;
 
 image = Image.open(image_file)
 aspect = float(image.size[0]) / image.size[1]
