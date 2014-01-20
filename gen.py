@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # eye from:
 # http://www.flickr.com/photos/vernhart/910778661/
